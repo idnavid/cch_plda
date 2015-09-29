@@ -27,7 +27,7 @@
 % Aleksandr Sizov, UEF 2014
 %**************************************************************************
 
-function [data model stats ] = em_initialize(data, matrixID, params)
+function [data, model, stats ] = em_initialize(data, matrixID, params)
 model = []; stats = [];
 
 % Center data after length normalization
