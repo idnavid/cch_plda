@@ -70,15 +70,15 @@ for i = 1:length(enrol_persons)
    spk_data = enrol_data(enrol_persons(i) == enrol_labels,:);
    enrol_data_avr(i,:) = mean(spk_data);
 end
-enrol_labels = enrol_persons; %#ok<NASGU%#ok<MSNU> >
-    
+enrol_labels = enrol_persons;
+
 matrixID = create_incidence_matrix(train_labels);
 
 % Sort persons according to the number of samples
 numSessions = sum(matrixID);
 [junk,I] = sort(numSessions);
 matrixID = matrixID(:,I);
-
+                        
 %% PLDA
 if strcmp(params.PLDA_type, 'two-cov')
     [model stats] = two_cov_initialize(train_data', matrixID);
