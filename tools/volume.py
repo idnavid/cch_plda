@@ -29,7 +29,7 @@ def read_rms(sphfile):
   items = out_list[5].split(' ')
   rms2 = float(items[-1])
   rms1 = float(items[-5])
-  print rms1,rms2
+  return rms1,rms2
   
   
        
