@@ -1,0 +1,24 @@
+ivector-plda-scoring 'ivector-copy-plda --smoothing=0.0 exp/ivector_plda/plda - |' 'ark:ivector-transform exp/sre08.iv/lda_transform.mat scp:exp/trn.iv/ivector.scp ark:- | ivector-subtract-global-mean ark:- ark:- |' 'ark:ivector-transform exp/sre08.iv/lda_transform.mat scp:exp/tst.iv/ivector.scp ark:- | ivector-subtract-global-mean ark:- ark:- |' 'cat '\''data/trials/trials.txt'\'' | awk '\''{print $1, $2}'\'' |' score/plda.output 
+ivector-copy-plda --smoothing=0.0 exp/ivector_plda/plda - 
+ivector-transform exp/sre08.iv/lda_transform.mat scp:exp/trn.iv/ivector.scp ark:- 
+ivector-subtract-global-mean ark:- ark:- 
+LOG (ivector-transform:main():ivector-transform.cc:91) Processed 1999 iVectors.
+LOG (ivector-transform:main():ivector-transform.cc:99) Norm of mean was 5.86341 (should be close to zero), length divided by sqrt(dim) was 1.00366 (should probably be close to one)
+LOG (ivector-subtract-global-mean:main():ivector-subtract-global-mean.cc:76) Read 1999 iVectors.
+LOG (ivector-subtract-global-mean:main():ivector-subtract-global-mean.cc:79) Norm of iVector mean was 5.86341
+ivector-subtract-global-mean ark:- ark:- 
+ivector-transform exp/sre08.iv/lda_transform.mat scp:exp/tst.iv/ivector.scp ark:- 
+LOG (ivector-transform:main():ivector-transform.cc:91) Processed 500 iVectors.
+LOG (ivector-transform:main():ivector-transform.cc:99) Norm of mean was 5.85416 (should be close to zero), length divided by sqrt(dim) was 1.00257 (should probably be close to one)
+LOG (ivector-subtract-global-mean:main():ivector-subtract-global-mean.cc:76) Read 500 iVectors.
+LOG (ivector-subtract-global-mean:main():ivector-subtract-global-mean.cc:79) Norm of iVector mean was 5.85416
+LOG (ivector-plda-scoring:main():ivector-plda-scoring.cc:96) Reading train iVectors
+LOG (ivector-subtract-global-mean:main():ivector-subtract-global-mean.cc:108) Wrote 1999 mean-subtracted iVectors
+LOG (ivector-plda-scoring:main():ivector-plda-scoring.cc:110) Read 1999 training iVectors, errors on 0
+LOG (ivector-plda-scoring:main():ivector-plda-scoring.cc:114) Average renormalization scale on training iVectors was 0.620119
+LOG (ivector-plda-scoring:main():ivector-plda-scoring.cc:117) Reading test iVectors
+LOG (ivector-subtract-global-mean:main():ivector-subtract-global-mean.cc:108) Wrote 500 mean-subtracted iVectors
+LOG (ivector-plda-scoring:main():ivector-plda-scoring.cc:131) Read 500 test iVectors.
+LOG (ivector-plda-scoring:main():ivector-plda-scoring.cc:134) Average renormalization scale on test iVectors was 0.619056
+LOG (ivector-plda-scoring:main():ivector-plda-scoring.cc:198) Mean score was -4.31199, standard deviation was 13.0184
+LOG (ivector-plda-scoring:main():ivector-plda-scoring.cc:201) Processed 999500 trials, 0 had errors.

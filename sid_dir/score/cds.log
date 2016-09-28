@@ -1,0 +1,3 @@
+ivector-compute-dot-products - scp:exp/trn.iv/ivector.scp scp:exp/tst.iv/ivector.scp score/cds.output 
+LOG (ivector-compute-dot-products:main():ivector-compute-dot-products.cc:108) Mean dot-product was 15.9156, standard deviation was 20.6493
+LOG (ivector-compute-dot-products:main():ivector-compute-dot-products.cc:111) Processed 999500 trials 0 had errors.

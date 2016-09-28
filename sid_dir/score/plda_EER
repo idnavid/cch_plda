@@ -1,0 +1,2 @@
+compute-eer score/plda.score.key 
+LOG (compute-eer:main():compute-eer.cc:136) Equal error rate is 6.62905%, at threshold 14.9459

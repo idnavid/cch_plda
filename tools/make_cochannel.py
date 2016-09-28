@@ -14,47 +14,44 @@ def mix_signals(s1,s2,orig_sir,target_sir):
     return s1 + alpha*s2
 
 
-def switchboard(filename):
+def switchboard(filename,ch,target_sir):
     # We need to deal with each dataset separately. 
     # Switchboard data is in sph format. 
     
     # first will have to convert to wav file. 
     sph2pipe_cmd = '/home/nxs113020/kaldi-trunk/tools/sph2pipe_v2.5/sph2pipe'
-    wav_dir = '../tmp_dir/'
+    wav_dir = '/home/nxs113020/tmp_dir/'
     basename = filename.split('/')[-1][:-4]
-    print "basename:",basename
+    #print "basename:",basename
     wavname = '%s/%s_%s.wav'
     sph2wav_format = '%s %s -p -c %s -f wav > %s'
-    channel = '1'
+    # Two channel maps to turn A/B to 1/2
+    channel_map = {'A':'1','B':'2'}
+    invert_channel_map = {'A':'2','B':'1'}
+    target_channel = channel_map[ch] # target channel
     os.system(sph2wav_format%(sph2pipe_cmd,filename, 
-                channel,wavname%(wav_dir,basename,channel)))
-    print "created", wavname%(wav_dir,basename,channel)
-    channel = '2'
+                target_channel,wavname%(wav_dir,basename,target_channel)))
+    #print "created", wavname%(wav_dir,basename,target_channel)
+    
+    background_channel = invert_channel_map[ch] # background channel
     os.system(sph2wav_format%(sph2pipe_cmd,filename,
-                channel,wavname%(wav_dir,basename,channel)))
-    print "created", wavname%(wav_dir,basename,channel)
+                background_channel,wavname%(wav_dir,basename,background_channel)))
+    #print "created", wavname%(wav_dir,basename,background_channel)
       
     # read wav files:
-    channel = '1'
-    (fs,sig1) = wav.read(wavname%(wav_dir,basename,channel))
-    channel = '2'
-    (fs,sig2) =  wav.read(wavname%(wav_dir,basename,channel))
-    print "sampling rate:",fs
+    (fs,sig1) = wav.read(wavname%(wav_dir,basename,target_channel))
+    (fs,sig2) =  wav.read(wavname%(wav_dir,basename,background_channel))
     rms1,rms2 = volume.read_rms(filename)
-    print "rms1:",rms1, "\trms2:",rms2
     sph_sir = 20.*np.log10(rms1/rms2)
-    print "original SIR:", sph_sir
-    target_sir = 100.
     s = mix_signals(sig1,sig2,sph_sir,target_sir)
-    pylab.plot(sig1)
-    pylab.plot(sig2)
-    pylab.figure()
-    pylab.plot(s)
-    pylab.show()
-    wav.write(wavname%(wav_dir,basename,'_1_2'),fs,s)
+    out_wav = wavname%(wav_dir,basename,target_channel+'_'+background_channel)
+    wav.write(out_wav,fs,s/(abs(max(s))+1e-4))
+    # return output wav name
+    return out_wav
+
 
 
 if __name__=='__main__':
-    switchboard('../tmp_dir/sw_20313.sph')
+    switchboard('/home/nxs113020/tmp.sph','A',100.)
     
     
