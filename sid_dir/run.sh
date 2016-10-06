@@ -21,39 +21,37 @@ num_job=300
 num_job_ubm=400
 num_job_tv=24
 
-clear_all(){
-    rm -rf exp mfcc data/*/split* data/*/feats.scp data/*/cmvn.scp data/*/vad.scp data/*vad score/*
-}
-#clear_all
+SIR=0
+mfccdir=/home/nxs113020/mfcc_${SIR}
 
 generate_evaluation_data(){
     # generates co-channel trn and tst data for evaluation
-    SIR=100
-    for x in trn tst; do
+    for x in tst; do
         python local/generate_files_swb.py data/${x}_list $SIR data/$x/wav.scp data/$x/utt2spk
         utils/utt2spk_to_spk2utt.pl data/$x/utt2spk > data/$x/spk2utt
     done
 }
-generate_evaluation_data
+#generate_evaluation_data
 
 run_mfcc(){
-    mfccdir=/home/nxs113020/mfcc
+    if [ ! -d $mfccdir ]; then
+        mkdir $mfccdir
+    fi
     for x in tst; do
       steps/make_mfcc.sh --nj $num_job --cmd "run.pl" \
         data/$x exp/make_mfcc/$x $mfccdir
       steps/compute_cmvn_stats.sh data/$x exp/make_mfcc/$x $mfccdir 
-      utils/fix_data_dir_sid.sh data/$x
+      #utils/fix_data_dir_sid.sh data/$x
       #sid/compute_vad_decision.sh --nj $num_job --cmd "$train_cmd" \
       #    data/$x exp/make_vad data/${x}_vad
-      utils/fix_data_dir_sid.sh data/$x
     done
 }
-run_mfcc
+#run_mfcc
 
 run_unsupervised_sad(){
     sad_tools="/home/nxs113020/speech_activity_detection/kaldi_setup/local/"
-    for x in trn tst; do
-       echo "$sad_tools/compute_vad_decision.sh $num_job \"$train_cmd\" data/$x"
+    for x in trn; do
+       $sad_tools/compute_vad_decision.sh $num_job \"$train_cmd\" data/$x
     done
 }
 #run_unsupervised_sad
@@ -82,13 +80,13 @@ run_tv_train(){
 
 run_iv_extract(){
 
-   for x in trn tst; do
+   for x in tst; do
        sid/extract_ivectors.sh --cmd "$train_cmd" --nj $num_job \
-           exp/extractor_${ubmdim} data/$x exp/${x}.iv || exit 1;
+           exp/extractor_${ubmdim}_both_genders data/$x exp/${x}.iv || exit 1;
    done
 
 }
-run_iv_extract
+#run_iv_extract
 
 generate_trials(){
     trials=data/trials/trials.txt
@@ -107,12 +105,12 @@ run_cds_score(){
     awk '{print $3}' score/cds.output > score/cds.score
     paste score/cds.score $trials_key > score/cds.score.key           
     echo "CDS EER : `compute-eer score/cds.score.key 2> score/cds_EER`"
+    echo "CDS EER and MINDCF: `src/bin/compute-verification-errors score/cds.score.key 10 1 0.001 2> score/cds_minDCF`"
 }
 run_cds_score
 
 run_lda_plda(){
     mkdir -p exp/ivector_plda; rm -rf exp/ivector_plda/*
-
     ivector-compute-lda --dim=200 --total-covariance-factor=0.1 \
         'ark:ivector-normalize-length scp:exp/sre08.iv/ivector.scp ark:- |' \
         ark:data/sre08/utt2spk \
@@ -131,7 +129,7 @@ run_lda_plda(){
     awk '{print $3}' score/plda.output > score/plda.score
     paste score/plda.score $trials_key > score/plda.score.key           
     echo "PLDA EER : `compute-eer score/plda.score.key 2> score/plda_EER`"
-
+    echo "PLDA EER and MINDCF: `src/bin/compute-verification-errors score/plda.score.key 10 1 0.001 2> score/plda_minDCF`"
 }
 run_lda_plda
 

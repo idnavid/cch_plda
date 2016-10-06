@@ -46,14 +46,14 @@ if __name__=='__main__':
         else:
             filepath = file_dict[basename]
         print basename
-        wavpath = make_cochannel.switchboard(filepath,channel,sir)
+        wavscp_format = "%s sox --ignore-length %s -t wav -b 16 - | "
         uttid = spkr_id+'_'+basename+':'+channel
-        wavscp_list.append(uttid+' '+wavpath+'\n')
+        wavpath = make_cochannel.switchboard(filepath,channel,sir)
+        wavscp_list.append(wavscp_format%(uttid,wavpath)+'\n')
         utt2spk_list.append(uttid+' '+spkr_id+'\n')
     
     wavscp_list = sorted(set(wavscp_list))
     utt2spk_list = sorted(set(utt2spk_list))
-    
     
     wavscp = open(out_wavscp,'w')
     utt2spk = open(out_utt2spk,'w')

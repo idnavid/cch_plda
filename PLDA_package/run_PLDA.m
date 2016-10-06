@@ -1,12 +1,15 @@
+
 % Aleksandr Sizov, UEF 2014
 
-% addpath(genpath(sprintf('%s/src', pwd))); % Add 'src' folder to path
+
+
+addpath(genpath(sprintf('%s/src', pwd))); % Add 'src' folder to path
 
 % PLDA parameters
 params.Vdim = 120; % Dimensionality of speaker latent variable   
 params.Udim = 0;    % Dimensionality of channel latent variable
 params.doMDstep = 1; % Indicator whether to do minimum-divergence step
-params.PLDA_type = 'two-cov'; % 'std' for standard PLDA
+params.PLDA_type = 'simp'; % 'std' for standard PLDA
                            % 'simp' for simplified PLDA and
                            % 'two-cov' for two-covariance model
 numIter = 10;   % Number of training iterations
@@ -23,6 +26,8 @@ fprintf('Vdim: %d, Udim: %d LDA_dim: %d, PCA_dim: %d\n\n', params.Vdim, ...
 ivectors_path = sprintf('%s/data/demo_data.mat',pwd);
 [train_data train_labels enrol_data enrol_labels test_data test_labels] = ...
     load_data(ivectors_path);
+
+
 
 % LDA
 if LDA_dim > 0

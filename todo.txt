@@ -1,0 +1,9 @@
+To do list for co-channel experiments. 
+- Compute scores for clean PLDA on co-channel data (SIR: 0 5 10 20 100)
+- Compute scores for mixed PLDA 
+    requires :
+        - co-channel data in dev set. 
+        - regenerating i-vectors for new dev set (on cluster)
+- Write code for modified PLDA. 
+- Rerun the same experiments performed in clean/mixed PLDA.  
+
