@@ -17,12 +17,12 @@ log_end(){
 
 set -e # exit on error
 
-num_job=300
+num_job=40
 num_job_ubm=400
 num_job_tv=24
 
 SIR=0
-mfccdir=/home/nxs113020/mfcc_${SIR}
+mfccdir=/erasable/nxs113020/mfcc_${SIR}
 
 generate_evaluation_data(){
     # generates co-channel trn and tst data for evaluation
@@ -37,13 +37,13 @@ run_mfcc(){
     if [ ! -d $mfccdir ]; then
         mkdir $mfccdir
     fi
-    for x in tst; do
-      steps/make_mfcc.sh --nj $num_job --cmd "run.pl" \
-        data/$x exp/make_mfcc/$x $mfccdir
-      steps/compute_cmvn_stats.sh data/$x exp/make_mfcc/$x $mfccdir 
-      #utils/fix_data_dir_sid.sh data/$x
-      #sid/compute_vad_decision.sh --nj $num_job --cmd "$train_cmd" \
-      #    data/$x exp/make_vad data/${x}_vad
+    for x in sre08; do
+      #steps/make_mfcc.sh --nj $num_job --cmd "$train_cmd" \
+      #  data/$x exp/make_mfcc/$x $mfccdir
+      #steps/compute_cmvn_stats.sh data/$x exp/make_mfcc/$x $mfccdir 
+      utils/fix_data_dir_sid.sh data/$x
+      sid/compute_vad_decision.sh --nj $num_job --cmd "$train_cmd" \
+          data/$x exp/make_vad data/${x}_vad
     done
 }
 #run_mfcc
@@ -80,20 +80,20 @@ run_tv_train(){
 
 run_iv_extract(){
 
-   for x in tst; do
+   for x in sre08; do
        sid/extract_ivectors.sh --cmd "$train_cmd" --nj $num_job \
            exp/extractor_${ubmdim}_both_genders data/$x exp/${x}.iv || exit 1;
    done
 
 }
-#run_iv_extract
+run_iv_extract
 
 generate_trials(){
     trials=data/trials/trials.txt
     trials_key=${trials}.key
     python local/make_trials.py data/trn/utt2spk data/tst/utt2spk $trials 
 }
-generate_trials
+#generate_trials
 
 
 run_cds_score(){
@@ -107,7 +107,7 @@ run_cds_score(){
     echo "CDS EER : `compute-eer score/cds.score.key 2> score/cds_EER`"
     echo "CDS EER and MINDCF: `src/bin/compute-verification-errors score/cds.score.key 10 1 0.001 2> score/cds_minDCF`"
 }
-run_cds_score
+#run_cds_score
 
 run_lda_plda(){
     mkdir -p exp/ivector_plda; rm -rf exp/ivector_plda/*
@@ -131,5 +131,5 @@ run_lda_plda(){
     echo "PLDA EER : `compute-eer score/plda.score.key 2> score/plda_EER`"
     echo "PLDA EER and MINDCF: `src/bin/compute-verification-errors score/plda.score.key 10 1 0.001 2> score/plda_minDCF`"
 }
-run_lda_plda
+#run_lda_plda
 
