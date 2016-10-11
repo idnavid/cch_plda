@@ -99,8 +99,8 @@ generate_trials(){
 run_cds_score(){
     cat $trials | awk '{print $1, $2}' | \
     ivector-compute-dot-products - \
-          scp:exp/trn.iv/ivector.scp \
-          scp:exp/tst.iv/ivector.scp \
+          scp:exp/trn.iv.0dB/ivector.scp \
+          scp:exp/tst.iv.0dB/ivector.scp \
           score/cds.output 2> score/cds.log
     awk '{print $3}' score/cds.output > score/cds.score
     paste score/cds.score $trials_key > score/cds.score.key           
@@ -112,18 +112,18 @@ run_cds_score(){
 run_lda_plda(){
     mkdir -p exp/ivector_plda; rm -rf exp/ivector_plda/*
     ivector-compute-lda --dim=200 --total-covariance-factor=0.1 \
-        'ark:ivector-normalize-length scp:exp/sre08.iv/ivector.scp ark:- |' \
-        ark:data/sre08/utt2spk \
-        exp/sre08.iv/lda_transform.mat 2> exp/sre08.iv/lda.log
+        'ark:ivector-normalize-length scp:exp/sre08.iv.0dB/ivector.scp ark:- |' \
+        ark:data/sre08.0dB/utt2spk \
+        exp/sre08.iv.0dB/lda_transform.mat 2> exp/sre08.iv.0dB/lda.log
 
-    ivector-compute-plda ark:data/sre08/spk2utt \
-          'ark:ivector-transform exp/sre08.iv/lda_transform.mat scp:exp/sre08.iv/ivector.scp ark:- | ivector-normalize-length ark:-  ark:- |' \
+    ivector-compute-plda ark:data/sre08.0dB/spk2utt \
+          'ark:ivector-transform exp/sre08.iv.0dB/lda_transform.mat scp:exp/sre08.iv.0dB/ivector.scp ark:- | ivector-normalize-length ark:-  ark:- |' \
             exp/ivector_plda/plda 2>exp/ivector_plda/plda.log
     
     ivector-plda-scoring  \
            "ivector-copy-plda --smoothing=0.0 exp/ivector_plda/plda - |" \
-           "ark:ivector-transform exp/sre08.iv/lda_transform.mat scp:exp/trn.iv/ivector.scp ark:- | ivector-subtract-global-mean ark:- ark:- |" \
-           "ark:ivector-transform exp/sre08.iv/lda_transform.mat scp:exp/tst.iv/ivector.scp ark:- | ivector-subtract-global-mean ark:- ark:- |" \
+           "ark:ivector-transform exp/sre08.iv.0dB/lda_transform.mat scp:exp/trn.iv.100dB/ivector.scp ark:- | ivector-subtract-global-mean ark:- ark:- |" \
+           "ark:ivector-transform exp/sre08.iv.0dB/lda_transform.mat scp:exp/tst.iv.100dB/ivector.scp ark:- | ivector-subtract-global-mean ark:- ark:- |" \
            "cat '$trials' | awk '{print \$1, \$2}' |" score/plda.output 2> score/plda.log
     
     awk '{print $3}' score/plda.output > score/plda.score
