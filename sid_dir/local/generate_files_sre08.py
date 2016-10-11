@@ -4,7 +4,7 @@
 
 import sys
 import subprocess
-sys.path.append('../tools/')
+sys.path.append('/scratch2/nxs113020/cch_plda/sid_dir/../tools/')
 import make_cochannel
 
 
@@ -29,7 +29,7 @@ if __name__=='__main__':
     sir = float(sys.argv[2])
     out_wavscp = sys.argv[3]
     out_utt2spk = sys.argv[4]
-    
+    channel_map = {'1':'A', '2':'B','':'A','A':'1','B':'2'}
     file_dict = {}
     wavscp_list = []
     utt2spk_list = []
@@ -40,10 +40,10 @@ if __name__=='__main__':
         spkr_id = filename_spkr_channel[1].strip()
         channel = filename_spkr_channel[2].strip()
         filepath = filename
-        print basename
+        #print basename
         wavscp_format = "%s sox --ignore-length %s -t wav -b 16 - | "
-        uttid = spkr_id+'_'+basename+':'+channel
-        wavpath = make_cochannel.switchboard(filepath,channel,sir)
+        uttid = spkr_id+'_'+basename+':'+channel_map[channel]
+        wavpath = make_cochannel.nistsre2008(filepath,channel_map[channel],sir)
         wavscp_list.append(wavscp_format%(uttid,wavpath)+'\n')
         utt2spk_list.append(uttid+' '+spkr_id+'\n')
     

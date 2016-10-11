@@ -5,7 +5,8 @@ import os
 import scipy.io.wavfile as wav 
 import numpy as np
 import pylab 
-
+import wave
+import struct 
 
 def plot_cochannel(s1,s2,s_cch):
     ## Plot co-channel signal
@@ -19,7 +20,7 @@ def plot_cochannel(s1,s2,s_cch):
     pylab.plot(s1,color='g',lw=0.1,ls=':')
     pylab.plot(s2,color='r',lw=0.1,ls=':')
     pylab.show()
- 
+
 def mix_signals(s1,s2,orig_sir,target_sir):
     # mix (sum) two signals s1 and s2 to create cochannel audio.
     # orig_sir is 10log(P(s1)/P(s2)). And target_sir is the target 
@@ -31,7 +32,7 @@ def nistsre2008(filename, ch, target_sir):
     # first will have to convert to wav file. 
     #sph2pipe_cmd = '/home/nxs113020/kaldi-trunk/tools/sph2pipe_v2.5/sph2pipe'
     sph2pipe_cmd  = '/scratch2/share/nxs113020/tools/kaldi_dir/kaldi/tools/sph2pipe_v2.5/sph2pipe'
-    wav_dir = '/home/nxs113020/tmp_dir/'
+    wav_dir = '/erasable/nxs113020/tmp_dir/'
     basename = filename.split('/')[-1][:-4]
     #print "basename:",basename
     wavname = '%s/%s_%s.wav'
@@ -53,6 +54,8 @@ def nistsre2008(filename, ch, target_sir):
     # read wav files:
     (fs,sig1) = wav.read(wavname%(wav_dir,basename,target_channel))
     (fs,sig2) =  wav.read(wavname%(wav_dir,basename,background_channel))
+    os.system('rm %s'%(wavname%(wav_dir,basename,'1')))
+    os.system('rm %s'%(wavname%(wav_dir,basename,'2')))
     rms1,rms2 = volume.read_rms(filename)
     sph_sir = 20.*np.log10(rms1/rms2)
     s = mix_signals(sig1,sig2,sph_sir,target_sir)
@@ -60,9 +63,10 @@ def nistsre2008(filename, ch, target_sir):
         alpha = np.exp(sph_sir/20.0)/np.exp(target_sir/20.0)
         s = s/(1.+alpha)
     
-    plot_cochannel(sig1,sig2,s) 
+    #plot_cochannel(sig1,sig2,s) 
     out_wav = wavname%(wav_dir,basename,target_channel+'_'+background_channel)
-    wav.write(out_wav,fs,s/(abs(max(s))+1e-4))
+    data = np.array(s, dtype=np.int16)
+    wav.write(out_wav,fs,data)
     return out_wav # name of output wav file.
 
    
@@ -97,9 +101,10 @@ def switchboard(filename,ch,target_sir):
     rms1,rms2 = volume.read_rms(filename)
     sph_sir = 20.*np.log10(rms1/rms2)
     s = mix_signals(sig1,sig2,sph_sir,target_sir)
-    plot_cochannel(sig1,sig2,s) 
+    #plot_cochannel(sig1,sig2,s) 
     out_wav = wavname%(wav_dir,basename,target_channel+'_'+background_channel)
-    wav.write(out_wav,fs,s/(abs(max(s))+1e-4))
+    data = float2pcm(s/(abs(max(s))+1e-4), 'int16')
+    wav.write(out_wav,fs,data)
     return out_wav # name of output wav file.
 
 
